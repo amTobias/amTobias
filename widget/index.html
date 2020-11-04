@@ -1,0 +1,34 @@
+<html>
+<head>
+
+<script src="https://dashboard.acuitytrading.com/Widgets/lib/@1.0.0/widget-core.js"></script>
+<style>
+
+
+</style>
+</head>
+<body>
+
+
+
+<div id="sentiment-complex"></div>
+
+
+
+<script>
+    AcuityWidgets.globals({
+        apikey: 'f5a0f559-dcdd-4171-af38-2a31bb95bb66',
+        locale: 'en-EN'
+    });
+
+    var widget = AcuityWidgets.CreateWidget(
+        'SentimentComplex',
+        document.getElementById('sentiment-complex'),
+        {settingId: 136}
+    );
+
+    widget.mount();
+</script>
+
+</body>
+</html>
