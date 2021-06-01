@@ -118,11 +118,6 @@
             // mentions_menu_hover: mentions_menu_hover,
             // mentions_menu_complete: mentions_menu_complete,
             // mentions_select: mentions_select
-        }).then(function (editors){
-            wordcount = tinymce.activeEditor.plugins.wordcount;
-            var wordsCounted = wordcount.body.getWordCount();
-            var content = tinymce.activeEditor.getContent();
-            countWords(wordsCounted, content);
         });
     </script>
   <meta name="robots" content="noindex, nofollow" />
