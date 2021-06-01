@@ -8,6 +8,58 @@
 
 <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
+  var cleanHTML = function(input) {
+    console.log("BEFORE >");
+    console.log(input);
+    
+    
+    // 1. remove line breaks / Mso classes
+    var stringStripper = /(\n|\r| class=(")?Mso[a-zA-Z]+(")?)/g;
+    var output = input.replace(stringStripper, ' ');
+    
+    console.log("STEP 1 >");
+    console.log(output);
+    
+    // 2. strip Word generated HTML comments
+    var commentSripper = new RegExp('<!--(.*?)-->', 'g');
+    var output = output.replace(commentSripper, '');
+    
+    console.log("STEP 2 >");
+    console.log(output);
+    
+    // 3. remove tags leave content if any
+    var tagStripper = new RegExp('<(\/)*(title|meta|link|span|\\?xml:|st1:|o:|font)(.*?)>', 'gi');
+    output = output.replace(tagStripper, '');
+    
+    console.log("STEP 3 >");
+    console.log(output);
+    
+    // 4. Remove everything in between and including tags '<style(.)style(.)>'
+    var badTags = ['style', 'script', 'applet', 'embed', 'noframes', 'noscript'];
+    
+    for (var i = 0; i < badTags.length; i++) {
+        var tagStripper = new RegExp('<' + badTags[i] + '.*?' + badTags[i] + '(.*?)>', 'gi');
+        output = output.replace(tagStripper, '');
+    }
+    
+    console.log("STEP 4 >");
+    console.log(output);
+    
+    // A different attempt
+    //output = (output).replace(/font-family\:[^;]+;?|font-size\:[^;]+;?|line-height\:[^;]+;?/g, '');
+    
+    // 5. remove attributes ' style="..."'
+    var badAttributes = ['start', 'align'];
+    for (var i = 0; i < badAttributes.length; i++) {
+        var attributeStripper = new RegExp(' ' + badAttributes[i] + '="(.*?)"', 'gi');
+        output = output.replace(attributeStripper, '');
+    }
+    
+    console.log("STEP 5 >");
+    console.log(output);
+    
+    return output;
+};
      //   var wordcount = 0, correction = 0, readingTime = 0, wcContainer = $('#wordsCount'), ctContainer = $("#calculatedTime"), isContentChanged = false;
         tinymce.init({
             selector: '#article_content',
@@ -24,9 +76,10 @@
             autosave_restore_when_empty: false,
             autosave_retention: '2m',
             paste_word_valid_elements: 'b,strong,i,em,h1,h2,h3,h4,h5,a,ul,li,p,a,ul,li',
-            paste_retain_style_properties: "all",
-            //paste_webkit_styles: 'b,strong,i,em,h1,h2,h3,h4,h5,a,ul,li,p,table,tr,td,tbody,thead,th',
-            //paste_enable_default_filters: false,
+            paste_retain_style_properties: "color",
+    paste_postprocess: function(plugin, args) {
+        args.node.innerHTML = cleanHTML(args.node.innerHTML);
+    },
             formats: {
                 bold: { inline: 'b'},
             },
