@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+        var wordcount = 0, correction = 0, readingTime = 0, wcContainer = $('#wordsCount'), ctContainer = $("#calculatedTime"), isContentChanged = false;
+        tinymce.init({
+            selector: '#article_content',
+            plugins: 'paste code print preview importcss searchreplace autolink autosave save directionality visualblocks visualchars fullscreen image link media template table charmap hr anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
+
+            mobile: {
+                plugins: 'paste code print preview importcss searchreplace autolink autosave save directionality visualblocks visualchars fullscreen image link media template table charmap hr anchor toc insertdatetime advlist lists wordcount textpattern noneditable help charmap quickbars emoticons'
+            },
+            menubar: 'file edit view insert format tools table tc help',
+            toolbar: 'paste undo redo | bold italic underline strikethrough code | fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+            autosave_ask_before_unload: true,
+            autosave_interval: '30s',
+            autosave_prefix: '{path}{query}-{id}-',
+            autosave_restore_when_empty: false,
+            autosave_retention: '2m',
+            paste_word_valid_elements: 'b,strong,i,em,h1,h2,h3,h4,h5,a,ul,li,p,a,ul,li',
+            formats: {
+                bold: { inline: 'b'},
+            },
+            image_class_list: [
+                { title: 'None', value: '' },
+                { title: 'Some class', value: 'class-name' }
+            ],
+            rel_list: [
+                {title: 'AM internal Link', value: ''},
+                {title: 'External Link', value: 'nofollow'}
+            ],
+            importcss_append: true,
+            templates: [
+                { title: 'Responsive Table', description: 'creates a new responsive table', content: '<div class="auto-scrollbar"><table style="width:98%;"><tr><td> </td><td> </td><td> </td></tr><tr><td> </td><td> </td><td> </td></tr></table></div>' },
+            ],
+            media_url_resolver: function (data, resolve, reject) {
+                const id = getYoutubeId(data.url);
+                if (id) {
+                    getVideoInfo(id, 'AIzaSyA6YP4K7Tb6CQ3laWqjDiTXLbFcH9Z40Jw')
+                        .then(({items}) => {
+                            const video = items[0];
+                            if (video) {
+                                let iframe = $(video.player.embedHtml).addClass('media-iframe').attr('id', `iframe-${id}`);
+                                resolve({html: `${iframe[0].outerHTML}<div class="media-microdata" id="${id}"><script type="application/ld+json">${getVideoDataJson(video)}<\/script></div>`});
+                            } else {
+                                reject({msg: 'Cannot get info'})
+                            }
+                        })
+                        .fail(() => {
+                            resolve({html: ''});
+                        });
+                } else {
+                    resolve({html: ''});
+                }
+            },
+            height: 600,
+            image_caption: true,
+            content_style: 'a{text-decoration: none;color:#237dea;}',
+            quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+            noneditable_noneditable_class: 'mceNonEditable',
+            toolbar_mode: 'sliding',
+            tinycomments_mode: 'embedded',
+            contextmenu: 'link image imagetools table configurepermanentpen',
+            a11y_advanced_options: true,
+            extended_valid_elements: "span[class,style],b,script[type|src]",
+            verify_html: true,
+            images_upload_url: "/manager/s3/upload",
+            imagetools_toolbar: 'imageoptions',
+            toc_depth: 2,
+            browser_spellcheck: true,
+            setup: function (editor) {
+                editor.on('change blur keyup', function (e) {
+                    isContentChanged = true;
+                    var wordsCounted = wordcount.body.getWordCount();
+                    var content = tinymce.activeEditor.getContent();
+                    countWords(wordsCounted, content);
+                });
+                editor.on('submit', function(e) {
+                    if (isContentChanged) {
+                        e.submitter.disabled = true;
+                        let content = $(tinymce.activeEditor.getContent());
+                        const blocks = content.filter('.media-microdata');
+
+                        blocks.each(function() {
+                            const id = $(this).attr('id');
+                            if (!$(`iframe#iframe-${id}`, content).length) {
+                                content = content.not(`div#${id}.media-microdata`);
+                            }
+                        });
+
+                        tinymce.activeEditor.setContent($('<div>').append(content).html());
+                    }
+                });
+                editor.on('ExecCommand', (event) => {
+                    const command = event.command;
+                    if (command === 'mceMedia') {
+                        const tabElems = document.querySelectorAll('div[role="tablist"] .tox-tab');
+                        tabElems.forEach(tabElem => {
+                            if (tabElem.innerText === 'Embed') {
+                                tabElem.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            }
+            /*
+            The following settings require more configuration than shown here.
+            For information on configuring the mentions plugin, see:
+            https://www.tiny.cloud/docs/plugins/mentions/.
+            */
+            // mentions_selector: '.mymention',
+            // mentions_fetch: mentions_fetch,
+            // mentions_menu_hover: mentions_menu_hover,
+            // mentions_menu_complete: mentions_menu_complete,
+            // mentions_select: mentions_select
+        }).then(function (editors){
+            wordcount = tinymce.activeEditor.plugins.wordcount;
+            var wordsCounted = wordcount.body.getWordCount();
+            var content = tinymce.activeEditor.getContent();
+            countWords(wordsCounted, content);
+        });
+    </script>
+  <meta name="robots" content="noindex, nofollow" />
+
+</head>
+<body>
+
+
+  <h1>TinyMCE Quick Start Guide</h1>
+    <form method="post">
+      <textarea id="article_content">Hello, World!</textarea>
+    </form>
+
+
+</body>
+</html>
