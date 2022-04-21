@@ -14,9 +14,20 @@
         iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
 
     });
-iframe.contentWindow.addEventListener('resize', function() {
-        iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
+
+// React to content height changes and adapt the size of the iframe
+const resizeObserver = new ResizeObserver(entries => {
+  entries.forEach(entry => {
+    console.log(entry);
+    iframe.style.height = `${entry.target.scrollHeight}px`;
+  });
 });
+resizeObserver.observe(iframe.contentWindow.document.body);
+
+
+//iframe.contentWindow.addEventListener('resize', function() {
+//        iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
+//});
 
 //iframe.contentWindow.addEventListener("resize", () => {
 //        iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
