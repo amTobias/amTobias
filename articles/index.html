@@ -12,7 +12,12 @@
 
     iframe.addEventListener('load', function() {
         iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
-    }); 
+
+    });
+iframe.contentWindow.addEventListener("resize", () => {
+        iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
+});
+
 </script>
 </p>
 
