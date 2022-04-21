@@ -14,7 +14,7 @@
         iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
 
     });
-iframe.addEventListener('resize', function() {
+iframe.contentWindow.addEventListener('resize', function() {
         iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
 });
 
